@@ -1,0 +1,341 @@
+/* === Sweet Strategy - Donut Escape === */
+/* Mobile-first, portrait-optimized */
+
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+  -webkit-tap-highlight-color: transparent;
+}
+
+html,
+body {
+  width: 100%;
+  height: 100%;
+  overflow: hidden;
+  touch-action: none;
+  -webkit-touch-callout: none;
+  -webkit-user-select: none;
+  user-select: none;
+  overscroll-behavior: none;
+  font-family: "M PLUS Rounded 1c", sans-serif;
+  background: #1a0a2e;
+}
+
+#game-container {
+  width: 100%;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  position: relative;
+  max-width: 500px;
+  margin: 0 auto;
+}
+
+#game-canvas {
+  flex: 1;
+  width: 100%;
+  display: block;
+  touch-action: none;
+  image-rendering: auto;
+}
+
+#ui-overlay {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  pointer-events: none;
+  z-index: 10;
+}
+
+#status-bar {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 8px 16px;
+  background: linear-gradient(180deg, transparent, rgba(26, 10, 46, 0.9));
+  color: #ffeedd;
+  font-size: 14px;
+  font-weight: 700;
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  transform: translateY(-100%);
+}
+
+#level-info {
+  background: rgba(255, 255, 255, 0.15);
+  padding: 4px 12px;
+  border-radius: 12px;
+  font-size: 13px;
+}
+
+#donut-count {
+  font-size: 13px;
+}
+
+/* === Controls Panel (D-pad + Donuts) === */
+#controls-panel {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 16px;
+  padding: 10px 12px;
+  padding-bottom: max(10px, env(safe-area-inset-bottom));
+  background: linear-gradient(
+    180deg,
+    rgba(26, 10, 46, 0.85),
+    rgba(26, 10, 46, 0.98)
+  );
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+  pointer-events: all;
+}
+
+/* === D-Pad === */
+#dpad {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 2px;
+  flex-shrink: 0;
+}
+
+.dpad-mid {
+  display: flex;
+  align-items: center;
+  gap: 2px;
+}
+
+.dpad-btn {
+  width: 48px;
+  height: 48px;
+  border: none;
+  border-radius: 12px;
+  background: rgba(255, 255, 255, 0.12);
+  color: #ffeedd;
+  font-size: 18px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.1s ease;
+  touch-action: manipulation;
+  -webkit-tap-highlight-color: transparent;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.3);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.dpad-btn:active {
+  background: rgba(255, 200, 100, 0.35);
+  transform: scale(0.9);
+  box-shadow: 0 0 12px rgba(255, 200, 100, 0.4);
+}
+
+.dpad-center {
+  width: 48px;
+  height: 48px;
+  border-radius: 12px;
+  background: rgba(255, 255, 255, 0.04);
+}
+
+/* === Donut Buttons === */
+#action-bar {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  pointer-events: all;
+}
+
+.donut-btn {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 12px;
+  border-radius: 14px;
+  background: rgba(255, 255, 255, 0.08);
+  border: 2px solid rgba(255, 255, 255, 0.12);
+  cursor: pointer;
+  transition: all 0.2s ease;
+  position: relative;
+  min-width: 120px;
+}
+
+.donut-btn:active {
+  transform: scale(0.93);
+}
+
+.donut-btn.selected {
+  background: rgba(255, 200, 100, 0.25);
+  border-color: #ffcc44;
+  box-shadow: 0 0 20px rgba(255, 200, 100, 0.3);
+}
+
+.donut-btn.disabled {
+  opacity: 0.35;
+  pointer-events: none;
+}
+
+.donut-icon {
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  position: relative;
+  flex-shrink: 0;
+}
+
+/* Donut icon — ring with hole matching in-game design */
+.strawberry-icon {
+  background: radial-gradient(circle at 40% 35%, #FF69B4, #CC3377);
+  box-shadow:
+    inset 0 -3px 6px rgba(0, 0, 0, 0.2),
+    0 2px 6px rgba(204, 51, 119, 0.5);
+}
+.strawberry-icon::before {
+  content: "";
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  background: rgba(26, 10, 46, 0.85);
+  box-shadow: inset 0 1px 2px rgba(0, 0, 0, 0.3);
+}
+.strawberry-icon::after {
+  content: "";
+  position: absolute;
+  top: 2px;
+  left: 5px;
+  width: 10px;
+  height: 5px;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.35);
+}
+
+.donut-label {
+  color: #ffeedd;
+  font-size: 12px;
+  font-weight: 700;
+}
+
+/* === Timer Display === */
+#timer-display {
+  color: #FFD700;
+  font-size: 16px;
+  font-weight: 900;
+  font-variant-numeric: tabular-nums;
+  letter-spacing: 1px;
+  text-shadow: 0 1px 4px rgba(0,0,0,0.5);
+}
+
+/* === Ranking Modal === */
+#ranking-modal {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.7);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000;
+  backdrop-filter: blur(6px);
+}
+
+.ranking-modal-content {
+  background: linear-gradient(145deg, rgba(60, 20, 100, 0.95), rgba(30, 10, 60, 0.98));
+  border: 2px solid rgba(255, 200, 100, 0.3);
+  border-radius: 20px;
+  padding: 28px 32px;
+  text-align: center;
+  max-width: 320px;
+  width: 85%;
+  box-shadow: 0 8px 40px rgba(0,0,0,0.5), 0 0 60px rgba(255, 200, 100, 0.1);
+}
+
+.ranking-modal-title {
+  font-size: 24px;
+  font-weight: 900;
+  color: #FFD700;
+  margin-bottom: 12px;
+  text-shadow: 0 2px 8px rgba(255, 200, 0, 0.3);
+}
+
+.ranking-modal-rank {
+  font-size: 18px;
+  color: #FF69B4;
+  font-weight: 700;
+  margin-bottom: 6px;
+}
+
+.ranking-modal-time {
+  font-size: 28px;
+  color: #FFFFFF;
+  font-weight: 900;
+  margin-bottom: 20px;
+  font-variant-numeric: tabular-nums;
+}
+
+#rank-name-input {
+  width: 100%;
+  padding: 10px 14px;
+  border-radius: 10px;
+  border: 2px solid rgba(255, 200, 100, 0.3);
+  background: rgba(255, 255, 255, 0.1);
+  color: #FFFFFF;
+  font-size: 16px;
+  font-family: 'M PLUS Rounded 1c', sans-serif;
+  font-weight: 700;
+  text-align: center;
+  outline: none;
+  margin-bottom: 16px;
+  box-sizing: border-box;
+}
+
+#rank-name-input::placeholder {
+  color: rgba(255, 255, 255, 0.4);
+}
+
+#rank-name-input:focus {
+  border-color: #FFD700;
+  box-shadow: 0 0 12px rgba(255, 200, 0, 0.3);
+}
+
+.ranking-modal-buttons {
+  display: flex;
+  gap: 10px;
+}
+
+.rank-btn {
+  flex: 1;
+  padding: 10px 8px;
+  border-radius: 10px;
+  border: none;
+  font-size: 14px;
+  font-weight: 900;
+  font-family: 'M PLUS Rounded 1c', sans-serif;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.rank-btn:active {
+  transform: scale(0.95);
+}
+
+.rank-btn-save {
+  background: linear-gradient(135deg, #FFD700, #FFA500);
+  color: #3C1464;
+  box-shadow: 0 3px 12px rgba(255, 200, 0, 0.3);
+}
+
+.rank-btn-skip {
+  background: rgba(255, 255, 255, 0.1);
+  color: #CCBBDD;
+  border: 1px solid rgba(255, 255, 255, 0.2);
+}
+

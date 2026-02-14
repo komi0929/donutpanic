@@ -1,0 +1,79 @@
+<!doctype html>
+<html lang="ja">
+  <head>
+    <meta charset="UTF-8" />
+    <meta
+      name="viewport"
+      content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no"
+    />
+    <meta name="apple-mobile-web-app-capable" content="yes" />
+    <meta name="mobile-web-app-capable" content="yes" />
+    <title>ドーナツパニック</title>
+    <meta
+      name="description"
+      content="お菓子の国を舞台にした戦略パズルゲーム。ドーナツでモンスターを誘い、パティシエを脱出させよう！"
+    />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link
+      href="https://fonts.googleapis.com/css2?family=M+PLUS+Rounded+1c:wght@400;700;900&display=swap"
+      rel="stylesheet"
+    />
+    <link rel="stylesheet" href="style.css" />
+  </head>
+  <body>
+    <div id="game-container">
+      <canvas id="game-canvas"></canvas>
+      <div id="ui-overlay">
+        <div id="status-bar">
+          <div id="level-info">ステージ 1</div>
+          <div id="timer-display">⏱ 0:00.0</div>
+          <div id="donut-count">
+            🍩 残り: <span id="donut-remaining">9</span>
+          </div>
+        </div>
+        <div id="controls-panel">
+          <div id="dpad">
+            <button class="dpad-btn" id="dpad-up" data-dir="up">▲</button>
+            <div class="dpad-mid">
+              <button class="dpad-btn" id="dpad-left" data-dir="left">◀</button>
+              <div class="dpad-center"></div>
+              <button class="dpad-btn" id="dpad-right" data-dir="right">▶</button>
+            </div>
+            <button class="dpad-btn" id="dpad-down" data-dir="down">▼</button>
+          </div>
+          <div id="action-bar">
+            <div class="donut-btn" data-type="strawberry" id="btn-strawberry">
+              <div class="donut-icon strawberry-icon"></div>
+              <span class="donut-label">ドーナツ</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Ranking Name Input Modal -->
+      <div id="ranking-modal" style="display:none;">
+        <div class="ranking-modal-content">
+          <div class="ranking-modal-title">🏆 ランクイン！</div>
+          <div class="ranking-modal-rank" id="rank-display"></div>
+          <div class="ranking-modal-time" id="rank-time-display"></div>
+          <input type="text" id="rank-name-input" placeholder="なまえを入力" maxlength="10" />
+          <div class="ranking-modal-buttons">
+            <button id="rank-save-btn" class="rank-btn rank-btn-save">記録する</button>
+            <button id="rank-skip-btn" class="rank-btn rank-btn-skip">記録しない</button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
+    <script src="js/config.js"></script>
+    <script src="js/utils.js"></script>
+    <script src="js/sprites.js"></script>
+    <script src="js/player.js"></script>
+    <script src="js/donut.js"></script>
+    <script src="js/monster.js"></script>
+    <script src="js/supabase-config.js"></script>
+    <script src="js/ranking.js"></script>
+    <script src="js/game.js"></script>
+  </body>
+</html>
