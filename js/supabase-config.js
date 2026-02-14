@@ -3,9 +3,7 @@
 
 const SUPABASE_URL = 'https://ksnayietrresyyfnlsps.supabase.co';
 
-// ↓↓↓ ここに anon key を貼り付けてください ↓↓↓
-const SUPABASE_ANON_KEY = 'YOUR_ANON_KEY_HERE';
-// ↑↑↑ Supabase Dashboard → Settings → API → anon public ↑↑↑
+const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImtzbmF5aWV0cnJlc3l5Zm5sc3BzIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzExMTAyOTQsImV4cCI6MjA4NjY4NjI5NH0.qQxt_Ng9iFmITNFxgWuh4wh8FsVLMUg9S6LQu_etqy8';
 
 // Supabase client (CDN版のグローバル変数から生成)
 let supabase = null;
