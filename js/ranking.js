@@ -71,7 +71,7 @@ const Ranking = {
     }
     try {
       const weekKey = this._weekKey();
-      const { data, error } = await supabase
+      const { data, error } = await supabaseClient
         .from('rankings')
         .select('name, time_seconds, level, created_at')
         .eq('week_key', weekKey)
@@ -123,7 +123,7 @@ const Ranking = {
 
     if (this._useSupabase) {
       try {
-        const { error } = await supabase
+        const { error } = await supabaseClient
           .from('rankings')
           .insert({
             name: entryName,
