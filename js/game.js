@@ -117,6 +117,13 @@ const Game = {
     document.getElementById('rank-save-btn').addEventListener('click', () => this._saveRanking());
     document.getElementById('rank-skip-btn').addEventListener('click', () => this._skipRanking());
 
+    // Ranking list button (title screen)
+    document.getElementById('ranking-list-btn').addEventListener('click', (e) => {
+      e.stopPropagation();
+      this._showRankingList();
+    });
+    document.getElementById('ranking-list-close-btn').addEventListener('click', () => this._hideRankingList());
+
     // Prevent context menu
     this.canvas.addEventListener('contextmenu', e => e.preventDefault());
     document.body.addEventListener('contextmenu', e => e.preventDefault());
@@ -126,6 +133,7 @@ const Game = {
 
     // Start
     this.state = 'title';
+    document.getElementById('title-buttons').style.display = '';
     this.lastTime = performance.now();
     this._loop(this.lastTime);
   },
@@ -275,18 +283,25 @@ const Game = {
    */
   _handleTap(screenX, screenY) {
     if (this.rankingModalOpen) return; // Block taps while modal is open
+    if (this.rankingListOpen) return; // Block taps while ranking list is open
 
     if (this.state === 'title') {
       this._loadLevel(this.currentLevel);
       this.state = 'playing';
       this.timerStart = performance.now();
       this.timerElapsed = 0;
+      // Show game controls, hide title buttons
+      document.getElementById('controls-panel').style.display = '';
+      document.getElementById('title-buttons').style.display = 'none';
       return;
     }
 
     if (this.state === 'clear' || this.state === 'gameover') {
       this.state = 'title';
       this._titleMonsters = null;
+      // Hide controls, show title buttons
+      document.getElementById('controls-panel').style.display = 'none';
+      document.getElementById('title-buttons').style.display = '';
       // Refresh rankings for title screen
       Ranking.preloadRankings();
       return;
@@ -650,26 +665,8 @@ const Game = {
       ctx.fillText(text, cx, instrY + i * 26);
     });
 
-    // === Weekly Ranking ===
-    const rankings = Ranking.getWeeklyRanking();
-    if (rankings.length > 0) {
-      const rankY = h * 0.66;
-      ctx.fillStyle = '#FFD700';
-      ctx.font = 'bold 14px "M PLUS Rounded 1c", sans-serif';
-      ctx.fillText('🏆 今週のランキング', cx, rankY);
-
-      ctx.font = '12px "M PLUS Rounded 1c", sans-serif';
-      const maxShow = Math.min(rankings.length, 5);
-      for (let i = 0; i < maxShow; i++) {
-        const r = rankings[i];
-        const medal = i === 0 ? '🥇' : i === 1 ? '🥈' : i === 2 ? '🥉' : `${i + 1}.`;
-        ctx.fillStyle = i < 3 ? '#FFD700' : '#CCBBDD';
-        ctx.fillText(`${medal} ${r.name}  ${Ranking.formatTime(r.time)}`, cx, rankY + 20 + i * 18);
-      }
-    }
-
     // Start prompt
-    const startY = rankings.length > 0 ? h * 0.82 : h * 0.78;
+    const startY = h * 0.78;
     const alpha = Math.sin(this.frame * 0.08) * 0.4 + 0.6;
     ctx.globalAlpha = alpha;
     ctx.fillStyle = '#FFFFFF';
@@ -679,6 +676,38 @@ const Game = {
 
     // Draw chef at bottom
     Sprites.drawChef(ctx, cx - 35, h * 0.88, 70, this.frame);
+  },
+
+  /**
+   * Show the weekly ranking list modal
+   */
+  _showRankingList() {
+    this.rankingListOpen = true;
+    const rankings = Ranking.getWeeklyRanking();
+    const body = document.getElementById('ranking-list-body');
+    if (rankings.length === 0) {
+      body.innerHTML = '<div style="color:#CCBBDD; padding:20px 0; font-size:14px;">まだ記録がありません</div>';
+    } else {
+      let html = '<div class="ranking-list-table">';
+      const maxShow = Math.min(rankings.length, 10);
+      for (let i = 0; i < maxShow; i++) {
+        const r = rankings[i];
+        const medal = i === 0 ? '🥇' : i === 1 ? '🥈' : i === 2 ? '🥉' : `${i + 1}.`;
+        const highlight = i < 3 ? ' style="color:#FFD700"' : ' style="color:#CCBBDD"';
+        html += `<div class="ranking-list-row"${highlight}>${medal} ${r.name}　${Ranking.formatTime(r.time)}</div>`;
+      }
+      html += '</div>';
+      body.innerHTML = html;
+    }
+    document.getElementById('ranking-list-modal').style.display = '';
+  },
+
+  /**
+   * Hide the ranking list modal
+   */
+  _hideRankingList() {
+    this.rankingListOpen = false;
+    document.getElementById('ranking-list-modal').style.display = 'none';
   },
 
   /**

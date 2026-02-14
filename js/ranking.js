@@ -20,15 +20,34 @@ const Ranking = {
   },
 
   /**
-   * Get the current ISO week key, e.g. "2026-W07"
+   * Get the current week key based on Sunday 9:00 AM JST reset.
+   * Week runs from Sunday 09:00 JST to the following Sunday 09:00 JST.
    */
   _weekKey() {
     const now = new Date();
-    const d = new Date(Date.UTC(now.getFullYear(), now.getMonth(), now.getDate()));
-    d.setUTCDate(d.getUTCDate() + 4 - (d.getUTCDay() || 7));
-    const yearStart = new Date(Date.UTC(d.getUTCFullYear(), 0, 1));
-    const weekNo = Math.ceil(((d - yearStart) / 86400000 + 1) / 7);
-    return `${d.getUTCFullYear()}-W${String(weekNo).padStart(2, '0')}`;
+    // Convert to JST (UTC+9)
+    const jstMs = now.getTime() + (now.getTimezoneOffset() * 60000) + (9 * 3600000);
+    const jst = new Date(jstMs);
+
+    // Calculate day-of-week (0=Sun) and hours in JST
+    let day = jst.getDay(); // 0=Sun, 1=Mon, ...
+    const hour = jst.getHours();
+
+    // Before Sunday 9AM counts as previous week
+    if (day === 0 && hour < 9) {
+      // Still in previous week period — go back 1 day
+      jst.setDate(jst.getDate() - 1);
+      day = jst.getDay();
+    }
+
+    // Find the most recent Sunday 9AM (the start of the current period)
+    const startDate = new Date(jst);
+    startDate.setDate(startDate.getDate() - day);
+    // Format as YYYY-MM-DD
+    const y = startDate.getFullYear();
+    const m = String(startDate.getMonth() + 1).padStart(2, '0');
+    const d = String(startDate.getDate()).padStart(2, '0');
+    return `${y}-${m}-${d}`;
   },
 
   _localStorageKey() {
