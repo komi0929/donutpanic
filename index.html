@@ -24,13 +24,6 @@
     <div id="game-container">
       <canvas id="game-canvas"></canvas>
       <div id="ui-overlay">
-        <div id="status-bar">
-          <div id="level-info">ステージ 1</div>
-          <div id="timer-display">⏱ 0:00.0</div>
-          <div id="donut-count">
-            🍩 残り: <span id="donut-remaining">9</span>
-          </div>
-        </div>
         <div id="controls-panel">
           <div id="dpad">
             <button class="dpad-btn" id="dpad-up" data-dir="up">▲</button>
@@ -41,10 +34,10 @@
             </div>
             <button class="dpad-btn" id="dpad-down" data-dir="down">▼</button>
           </div>
-          <div id="action-bar">
+          <div id="action-area">
+            <div id="donut-count">🍩 残り: <span id="donut-remaining">3</span></div>
             <div class="donut-btn" data-type="strawberry" id="btn-strawberry">
               <div class="donut-icon strawberry-icon"></div>
-              <span class="donut-label">ドーナツ</span>
             </div>
           </div>
         </div>

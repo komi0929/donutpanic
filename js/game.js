@@ -126,7 +126,6 @@ const Game = {
 
     // Start
     this.state = 'title';
-    document.getElementById('status-bar').style.display = 'none';
     this.lastTime = performance.now();
     this._loop(this.lastTime);
   },
@@ -136,8 +135,8 @@ const Game = {
    */
   _resizeCanvas() {
     const container = document.getElementById('game-container');
-    const actionBar = document.getElementById('action-bar');
-    const abHeight = actionBar ? actionBar.offsetHeight : 80;
+    const controlsPanel = document.getElementById('controls-panel');
+    const cpHeight = controlsPanel ? controlsPanel.offsetHeight : 80;
 
     this.width = container.clientWidth;
     this.height = container.clientHeight;
@@ -152,7 +151,7 @@ const Game = {
 
     // Calculate tile size
     if (this.rows > 0 && this.cols > 0) {
-      const availableHeight = this.height - abHeight - 20;
+      const availableHeight = this.height - cpHeight - 20;
       const tileSizeW = Math.floor(this.width / this.cols);
       const tileSizeH = Math.floor(availableHeight / this.rows);
       this.tileSize = Math.min(tileSizeW, tileSizeH);
@@ -204,9 +203,6 @@ const Game = {
 
     // Update UI
     this._updateUI();
-
-    // Update level info text
-    document.getElementById('level-info').textContent = level.name;
   },
 
   /**
@@ -285,14 +281,12 @@ const Game = {
       this.state = 'playing';
       this.timerStart = performance.now();
       this.timerElapsed = 0;
-      document.getElementById('status-bar').style.display = '';
       return;
     }
 
     if (this.state === 'clear' || this.state === 'gameover') {
       this.state = 'title';
       this._titleMonsters = null;
-      document.getElementById('status-bar').style.display = 'none';
       // Refresh rankings for title screen
       Ranking.preloadRankings();
       return;
@@ -373,9 +367,8 @@ const Game = {
 
     if (this.state === 'playing') {
       this._update(dt);
-      // Update timer display
+      // Update timer
       this.timerElapsed = (performance.now() - this.timerStart) / 1000;
-      document.getElementById('timer-display').textContent = '⏱ ' + Ranking.formatTime(this.timerElapsed);
     }
 
     this._draw();
@@ -497,6 +490,9 @@ const Game = {
     }
     ctx.globalAlpha = 1;
 
+    // Draw HUD (timer, stage name)
+    this._drawHUD();
+
     // Draw overlay screens
     if (this.state === 'clear') {
       this._drawClearScreen();
@@ -525,6 +521,37 @@ const Game = {
     }
   },
 
+  /**
+   * Draw in-game HUD (timer top-right, stage name top-left)
+   */
+  _drawHUD() {
+    if (this.state !== 'playing') return;
+    const ctx = this.ctx;
+    const w = this.width;
+    const pad = 12;
+
+    // Semi-transparent top bar background
+    ctx.fillStyle = 'rgba(26, 10, 46, 0.7)';
+    ctx.fillRect(0, 0, w, 36);
+
+    ctx.textBaseline = 'middle';
+
+    // Stage name — top left
+    ctx.textAlign = 'left';
+    ctx.fillStyle = '#CCBBDD';
+    ctx.font = '13px "M PLUS Rounded 1c", sans-serif';
+    const level = LEVELS[this.currentLevel];
+    ctx.fillText(level ? level.name : '', pad, 18);
+
+    // Timer — top right
+    ctx.textAlign = 'right';
+    ctx.fillStyle = '#FFD700';
+    ctx.font = 'bold 16px "M PLUS Rounded 1c", sans-serif';
+    ctx.fillText('⏱ ' + Ranking.formatTime(this.timerElapsed), w - pad, 18);
+
+    ctx.textAlign = 'left';
+  },
+
   _drawTitle() {
     const ctx = this.ctx;
     const w = this.width;
@@ -545,18 +572,14 @@ const Game = {
 
     // Animated roaming monsters in background
     for (const m of this._titleMonsters) {
-      // Move
       m.x += m.vx;
       m.y += m.vy;
-      // Bounce off edges
       if (m.x < 0.05 || m.x > 0.95) m.vx *= -1;
       if (m.y < 0.05 || m.y > 0.45) m.vy *= -1;
-      // Randomly change direction
       if (Math.random() < 0.005) {
         m.vx = (Math.random() - 0.5) * 0.001;
         m.vy = (Math.random() - 0.5) * 0.0008;
       }
-
       const mx = m.x * w;
       const my = m.y * h;
       ctx.globalAlpha = 0.6;
@@ -565,47 +588,66 @@ const Game = {
     }
 
     // Dark overlay for text readability
-    const overlay = ctx.createLinearGradient(0, h * 0.35, 0, h * 0.55);
+    const overlay = ctx.createLinearGradient(0, h * 0.32, 0, h * 0.58);
     overlay.addColorStop(0, 'rgba(26, 10, 46, 0)');
-    overlay.addColorStop(0.5, 'rgba(26, 10, 46, 0.85)');
-    overlay.addColorStop(1, 'rgba(26, 10, 46, 0.6)');
+    overlay.addColorStop(0.3, 'rgba(26, 10, 46, 0.8)');
+    overlay.addColorStop(0.7, 'rgba(26, 10, 46, 0.85)');
+    overlay.addColorStop(1, 'rgba(26, 10, 46, 0.5)');
     ctx.fillStyle = overlay;
-    ctx.fillRect(0, h * 0.35, w, h * 0.25);
+    ctx.fillRect(0, h * 0.32, w, h * 0.28);
 
-    // Title
+    // === Rich Title ===
     const bounce = Math.sin(this.frame * 0.05) * 5;
+    const titleY = h * 0.40 + bounce;
     ctx.textAlign = 'center';
     ctx.textBaseline = 'middle';
+    const fontSize = Math.min(44, w * 0.11);
+    ctx.font = `900 ${fontSize}px "M PLUS Rounded 1c", sans-serif`;
 
-    // Shadow
-    ctx.fillStyle = 'rgba(0,0,0,0.4)';
-    ctx.font = 'bold 38px "M PLUS Rounded 1c", sans-serif';
-    ctx.fillText('ドーナツパニック', cx + 2, h * 0.42 + bounce + 2);
+    // Glow layers
+    ctx.save();
+    const glowPulse = Math.sin(this.frame * 0.04) * 0.3 + 0.7;
+    ctx.shadowColor = '#FF69B4';
+    ctx.shadowBlur = 20 * glowPulse;
+    ctx.shadowOffsetX = 0;
+    ctx.shadowOffsetY = 0;
 
-    // Title text — katakana with flair
-    const titleGrad = ctx.createLinearGradient(cx - 150, 0, cx + 150, 0);
+    // Outer stroke
+    ctx.strokeStyle = 'rgba(255, 100, 180, 0.6)';
+    ctx.lineWidth = 6;
+    ctx.strokeText('ドーナツパニック', cx, titleY);
+
+    // Gradient fill
+    const titleGrad = ctx.createLinearGradient(cx - 160, titleY - 30, cx + 160, titleY + 30);
     titleGrad.addColorStop(0, '#FF69B4');
-    titleGrad.addColorStop(0.5, '#FFD700');
-    titleGrad.addColorStop(1, '#FF6347');
+    titleGrad.addColorStop(0.3, '#FFD700');
+    titleGrad.addColorStop(0.6, '#FF6347');
+    titleGrad.addColorStop(1, '#FF69B4');
     ctx.fillStyle = titleGrad;
-    ctx.fillText('ドーナツパニック', cx, h * 0.42 + bounce);
+    ctx.fillText('ドーナツパニック', cx, titleY);
 
-    // Donut emoji accents
-    ctx.font = '30px sans-serif';
-    ctx.fillText('🍩', cx - 180, h * 0.42 + bounce);
-    ctx.fillText('🍩', cx + 180, h * 0.42 + bounce);
+    // Inner white highlight stroke
+    ctx.strokeStyle = 'rgba(255, 255, 255, 0.25)';
+    ctx.lineWidth = 1;
+    ctx.strokeText('ドーナツパニック', cx, titleY);
+    ctx.restore();
 
-    // Instructions
-    ctx.fillStyle = '#CCBBDD';
+    // Subtitle
+    ctx.fillStyle = 'rgba(255, 220, 180, 0.7)';
+    ctx.font = '13px "M PLUS Rounded 1c", sans-serif';
+    ctx.fillText('🍩 スイーツ脱出パズル 🍩', cx, titleY + fontSize * 0.7);
+
+    // === Simplified Instructions (3 lines) ===
     ctx.font = '14px "M PLUS Rounded 1c", sans-serif';
+    const instrY = h * 0.54;
     const instructions = [
-      '🎯 パティシエをケーキの家へ導こう！',
-      '🍩 ドーナツボタンでモンスターを誘惑',
-      '💤 食べたモンスターは眠って壁になる',
-      '🕹️ 十字キーで移動',
+      '🏠 ケーキの家がゴール！',
+      '🍩 ドーナツでモンスターを誘惑',
+      '⏱ 1秒でも早くゴールを目指そう',
     ];
     instructions.forEach((text, i) => {
-      ctx.fillText(text, cx, h * 0.55 + i * 26);
+      ctx.fillStyle = i === 2 ? '#FFD700' : '#CCBBDD';
+      ctx.fillText(text, cx, instrY + i * 26);
     });
 
     // === Weekly Ranking ===
