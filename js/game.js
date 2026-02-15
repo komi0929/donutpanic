@@ -143,55 +143,37 @@ const Game = {
   },
 
   /**
-   * Resize canvas to fill available screen (above controls)
-   * Uses visualViewport API for accurate mobile browser sizing
+   * Resize canvas to match its flex-allocated size
    */
   _resizeCanvas() {
     const container = document.getElementById('game-container');
 
-    // Use visualViewport if available for accurate mobile height
-    // This accounts for browser chrome (address bar, toolbar)
-    let totalHeight;
+    // Use visualViewport for accurate mobile height (accounts for browser chrome)
     if (window.visualViewport) {
-      totalHeight = window.visualViewport.height;
+      container.style.height = window.visualViewport.height + 'px';
     } else {
-      totalHeight = window.innerHeight;
+      container.style.height = window.innerHeight + 'px';
     }
 
-    // Set container to the actual visible height
-    container.style.height = totalHeight + 'px';
-
-    // Get the controls/title-buttons height
-    const controlsPanel = document.getElementById('controls-panel');
-    const titleButtons = document.getElementById('title-buttons');
-    let bottomHeight = 0;
-    if (controlsPanel && controlsPanel.style.display !== 'none') {
-      bottomHeight = controlsPanel.offsetHeight;
-    } else if (titleButtons && titleButtons.style.display !== 'none') {
-      bottomHeight = titleButtons.offsetHeight;
-    }
-
-    // Canvas fills the remaining space
-    const canvasHeight = totalHeight - bottomHeight;
-    this.width = container.clientWidth;
-    this.height = canvasHeight;
+    // Read the actual size the flex layout gave the canvas
+    const rect = this.canvas.getBoundingClientRect();
+    this.width = rect.width;
+    this.height = rect.height;
 
     // Device pixel ratio for crisp rendering
     const dpr = window.devicePixelRatio || 1;
     this.canvas.width = this.width * dpr;
     this.canvas.height = this.height * dpr;
-    this.canvas.style.width = this.width + 'px';
-    this.canvas.style.height = this.height + 'px';
     this.ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
 
     // Calculate tile size for game grid
     if (this.rows > 0 && this.cols > 0) {
-      const availableHeight = this.height - 46; // 36px HUD bar + 10px margin
+      const availableHeight = this.height - 40; // 36px HUD bar + 4px pad
       const tileSizeW = Math.floor(this.width / this.cols);
       const tileSizeH = Math.floor(availableHeight / this.rows);
       this.tileSize = Math.min(tileSizeW, tileSizeH);
       this.offsetX = Math.floor((this.width - this.cols * this.tileSize) / 2);
-      this.offsetY = Math.floor((availableHeight - this.rows * this.tileSize) / 2) + 40;
+      this.offsetY = Math.floor((availableHeight - this.rows * this.tileSize) / 2) + 38;
     }
   },
 

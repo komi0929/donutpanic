@@ -4,7 +4,7 @@
     <meta charset="UTF-8" />
     <meta
       name="viewport"
-      content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no"
+      content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover"
     />
     <meta name="apple-mobile-web-app-capable" content="yes" />
     <meta name="mobile-web-app-capable" content="yes" />
@@ -22,53 +22,54 @@
   </head>
   <body>
     <div id="game-container">
+      <!-- Canvas: flex-grows to fill space ABOVE controls -->
       <canvas id="game-canvas"></canvas>
-      <div id="ui-overlay">
-        <!-- Title Screen Button -->
-        <div id="title-buttons" style="display:none;">
-          <button id="ranking-list-btn" class="title-btn">🏆 今週のランキング</button>
-        </div>
-        <!-- Game Controls (hidden on title/clear/gameover) -->
-        <div id="controls-panel" style="display:none;">
-          <div id="dpad">
-            <button class="dpad-btn" id="dpad-up" data-dir="up">▲</button>
-            <div class="dpad-mid">
-              <button class="dpad-btn" id="dpad-left" data-dir="left">◀</button>
-              <div class="dpad-center"></div>
-              <button class="dpad-btn" id="dpad-right" data-dir="right">▶</button>
-            </div>
-            <button class="dpad-btn" id="dpad-down" data-dir="down">▼</button>
+
+      <!-- Title Screen Button (normal flow, below canvas) -->
+      <div id="title-buttons" style="display:none;">
+        <button id="ranking-list-btn" class="title-btn">🏆 今週のランキング</button>
+      </div>
+
+      <!-- Game Controls (normal flow, below canvas) -->
+      <div id="controls-panel" style="display:none;">
+        <div id="dpad">
+          <button class="dpad-btn" id="dpad-up" data-dir="up">▲</button>
+          <div class="dpad-mid">
+            <button class="dpad-btn" id="dpad-left" data-dir="left">◀</button>
+            <div class="dpad-center"></div>
+            <button class="dpad-btn" id="dpad-right" data-dir="right">▶</button>
           </div>
-          <div id="action-area">
-            <div id="donut-count">🍩 残り: <span id="donut-remaining">3</span></div>
-            <div class="donut-btn" data-type="strawberry" id="btn-strawberry">
-              <div class="donut-icon strawberry-icon"></div>
-            </div>
+          <button class="dpad-btn" id="dpad-down" data-dir="down">▼</button>
+        </div>
+        <div id="action-area">
+          <div id="donut-count">🍩 残り: <span id="donut-remaining">3</span></div>
+          <div class="donut-btn" data-type="strawberry" id="btn-strawberry">
+            <div class="donut-icon strawberry-icon"></div>
           </div>
         </div>
       </div>
+    </div>
 
-      <!-- Ranking Name Input Modal (on clear) -->
-      <div id="ranking-modal" style="display:none;">
-        <div class="ranking-modal-content">
-          <div class="ranking-modal-title">🏆 ランクイン！</div>
-          <div class="ranking-modal-rank" id="rank-display"></div>
-          <div class="ranking-modal-time" id="rank-time-display"></div>
-          <input type="text" id="rank-name-input" placeholder="なまえを入力" maxlength="10" />
-          <div class="ranking-modal-buttons">
-            <button id="rank-save-btn" class="rank-btn rank-btn-save">記録する</button>
-            <button id="rank-skip-btn" class="rank-btn rank-btn-skip">記録しない</button>
-          </div>
+    <!-- Ranking Name Input Modal (on clear) -->
+    <div id="ranking-modal" style="display:none;">
+      <div class="ranking-modal-content">
+        <div class="ranking-modal-title">🏆 ランクイン！</div>
+        <div class="ranking-modal-rank" id="rank-display"></div>
+        <div class="ranking-modal-time" id="rank-time-display"></div>
+        <input type="text" id="rank-name-input" placeholder="なまえを入力" maxlength="10" />
+        <div class="ranking-modal-buttons">
+          <button id="rank-save-btn" class="rank-btn rank-btn-save">記録する</button>
+          <button id="rank-skip-btn" class="rank-btn rank-btn-skip">記録しない</button>
         </div>
       </div>
+    </div>
 
-      <!-- Weekly Ranking List Modal (from title screen) -->
-      <div id="ranking-list-modal" style="display:none;">
-        <div class="ranking-modal-content ranking-list-content">
-          <div class="ranking-modal-title">🏆 今週のランキング</div>
-          <div id="ranking-list-body"></div>
-          <button id="ranking-list-close-btn" class="rank-btn rank-btn-skip" style="margin-top:16px; width:100%;">閉じる</button>
-        </div>
+    <!-- Weekly Ranking List Modal (from title screen) -->
+    <div id="ranking-list-modal" style="display:none;">
+      <div class="ranking-modal-content ranking-list-content">
+        <div class="ranking-modal-title">🏆 今週のランキング</div>
+        <div id="ranking-list-body"></div>
+        <button id="ranking-list-close-btn" class="rank-btn rank-btn-skip" style="margin-top:16px; width:100%;">閉じる</button>
       </div>
     </div>
 
