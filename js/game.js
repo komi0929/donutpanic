@@ -118,11 +118,16 @@ const Game = {
     document.addEventListener('mouseleave', () => this._stopDpad());
 
     // Ranking modal buttons
-    document.getElementById('rank-save-btn').addEventListener('click', () => this._saveRanking());
-    document.getElementById('rank-skip-btn').addEventListener('click', () => this._skipRanking());
+    // Ranking modal buttons
+    const rankSaveBtn = document.getElementById('rank-save-btn');
+    if (rankSaveBtn) rankSaveBtn.addEventListener('click', () => this._saveRanking());
+    
+    const rankSkipBtn = document.getElementById('rank-skip-btn');
+    if (rankSkipBtn) rankSkipBtn.addEventListener('click', () => this._skipRanking());
 
     // Ranking list close button
-    document.getElementById('ranking-list-close-btn').addEventListener('click', () => this._hideRankingList());
+    const rankListCloseBtn = document.getElementById('ranking-list-close-btn');
+    if (rankListCloseBtn) rankListCloseBtn.addEventListener('click', () => this._hideRankingList());
 
     // Prevent context menu
     this.canvas.addEventListener('contextmenu', e => e.preventDefault());
