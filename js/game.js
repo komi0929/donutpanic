@@ -56,7 +56,11 @@ const Game = {
     this.ctx = this.canvas.getContext('2d');
 
     this._resizeCanvas();
+    // Resize handling — listen to both window.resize and visualViewport for mobile
     window.addEventListener('resize', () => this._resizeCanvas());
+    if (window.visualViewport) {
+      window.visualViewport.addEventListener('resize', () => this._resizeCanvas());
+    }
 
     // Touch events on canvas
     this.canvas.addEventListener('touchstart', (e) => this._onTouch(e), { passive: false });
@@ -139,15 +143,38 @@ const Game = {
   },
 
   /**
-   * Resize canvas to fill screen
+   * Resize canvas to fill available screen (above controls)
+   * Uses visualViewport API for accurate mobile browser sizing
    */
   _resizeCanvas() {
     const container = document.getElementById('game-container');
-    const controlsPanel = document.getElementById('controls-panel');
-    const cpHeight = controlsPanel ? controlsPanel.offsetHeight : 80;
 
+    // Use visualViewport if available for accurate mobile height
+    // This accounts for browser chrome (address bar, toolbar)
+    let totalHeight;
+    if (window.visualViewport) {
+      totalHeight = window.visualViewport.height;
+    } else {
+      totalHeight = window.innerHeight;
+    }
+
+    // Set container to the actual visible height
+    container.style.height = totalHeight + 'px';
+
+    // Get the controls/title-buttons height
+    const controlsPanel = document.getElementById('controls-panel');
+    const titleButtons = document.getElementById('title-buttons');
+    let bottomHeight = 0;
+    if (controlsPanel && controlsPanel.style.display !== 'none') {
+      bottomHeight = controlsPanel.offsetHeight;
+    } else if (titleButtons && titleButtons.style.display !== 'none') {
+      bottomHeight = titleButtons.offsetHeight;
+    }
+
+    // Canvas fills the remaining space
+    const canvasHeight = totalHeight - bottomHeight;
     this.width = container.clientWidth;
-    this.height = container.clientHeight;
+    this.height = canvasHeight;
 
     // Device pixel ratio for crisp rendering
     const dpr = window.devicePixelRatio || 1;
@@ -157,14 +184,14 @@ const Game = {
     this.canvas.style.height = this.height + 'px';
     this.ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
 
-    // Calculate tile size
+    // Calculate tile size for game grid
     if (this.rows > 0 && this.cols > 0) {
-      const availableHeight = this.height - cpHeight - 20;
+      const availableHeight = this.height - 46; // 36px HUD bar + 10px margin
       const tileSizeW = Math.floor(this.width / this.cols);
       const tileSizeH = Math.floor(availableHeight / this.rows);
       this.tileSize = Math.min(tileSizeW, tileSizeH);
       this.offsetX = Math.floor((this.width - this.cols * this.tileSize) / 2);
-      this.offsetY = Math.floor((availableHeight - this.rows * this.tileSize) / 2) + 10;
+      this.offsetY = Math.floor((availableHeight - this.rows * this.tileSize) / 2) + 40;
     }
   },
 
@@ -293,6 +320,8 @@ const Game = {
       // Show game controls, hide title buttons
       document.getElementById('controls-panel').style.display = '';
       document.getElementById('title-buttons').style.display = 'none';
+      // Recalculate canvas size with controls visible
+      setTimeout(() => this._resizeCanvas(), 0);
       return;
     }
 
@@ -302,6 +331,8 @@ const Game = {
       // Hide controls, show title buttons
       document.getElementById('controls-panel').style.display = 'none';
       document.getElementById('title-buttons').style.display = '';
+      // Recalculate canvas size with title buttons
+      setTimeout(() => this._resizeCanvas(), 0);
       // Refresh rankings for title screen
       Ranking.preloadRankings();
       return;
