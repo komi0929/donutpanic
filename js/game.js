@@ -663,25 +663,17 @@ const Game = {
     ctx.restore();
 
 
-    // === Simplified Instructions (3 lines) ===
-    ctx.font = '14px "M PLUS Rounded 1c", sans-serif';
-    const instrY = h * 0.48;
-    const instructions = [
-      '🏠 ケーキの家がゴール！',
-      '🍩 ドーナツでモンスターを誘惑',
-      '⏱ 1秒でも早くゴールを目指そう',
-    ];
-    instructions.forEach((text, i) => {
-      ctx.fillStyle = i === 2 ? '#FFD700' : '#CCBBDD';
-      ctx.fillText(text, cx, instrY + i * 26);
-    });
+    // === Single instruction ===
+    ctx.font = 'bold 18px "M PLUS Rounded 1c", sans-serif';
+    ctx.fillStyle = '#CCBBDD';
+    ctx.fillText('🍩 ドーナツでモンスターを誘惑！', cx, h * 0.48);
 
-    // Start prompt — prominent, centered
-    const startY = h * 0.70;
+    // Start prompt
+    const startY = h * 0.72;
     const alpha = Math.sin(this.frame * 0.08) * 0.4 + 0.6;
     ctx.globalAlpha = alpha;
     ctx.fillStyle = '#FFFFFF';
-    ctx.font = 'bold 22px "M PLUS Rounded 1c", sans-serif';
+    ctx.font = 'bold 26px "M PLUS Rounded 1c", sans-serif';
     ctx.fillText('タップしてスタート', cx, startY);
     ctx.globalAlpha = 1;
   },
