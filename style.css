@@ -164,6 +164,77 @@ body {
   pointer-events: none;
 }
 
+/* === Rank-In Animation List === */
+#rank-animation-list {
+  margin: 8px 0;
+  max-height: 240px;
+  overflow-y: auto;
+}
+
+.rank-entry {
+  display: flex;
+  align-items: center;
+  padding: 5px 10px;
+  margin: 3px 0;
+  border-radius: 8px;
+  background: rgba(255, 255, 255, 0.06);
+  font-size: 13px;
+  font-family: "M PLUS Rounded 1c", sans-serif;
+  color: rgba(255, 255, 255, 0.7);
+  opacity: 0;
+  transform: translateX(-30px);
+  animation: rankSlideIn 0.3s ease forwards;
+}
+
+.rank-entry.is-player {
+  background: linear-gradient(135deg, rgba(255, 200, 50, 0.25), rgba(255, 150, 30, 0.15));
+  border: 1.5px solid rgba(255, 200, 80, 0.6);
+  color: #FFD700;
+  font-weight: bold;
+  font-size: 14px;
+  animation: rankSlideIn 0.3s ease forwards, rankGlow 1.2s ease-in-out infinite alternate;
+}
+
+.rank-entry .rank-num {
+  width: 28px;
+  font-weight: bold;
+  flex-shrink: 0;
+  text-align: center;
+}
+
+.rank-entry .rank-name {
+  flex: 1;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  margin: 0 6px;
+}
+
+.rank-entry .rank-time {
+  flex-shrink: 0;
+  font-variant-numeric: tabular-nums;
+}
+
+@keyframes rankSlideIn {
+  from {
+    opacity: 0;
+    transform: translateX(-30px);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+
+@keyframes rankGlow {
+  from {
+    box-shadow: 0 0 6px rgba(255, 200, 50, 0.3);
+  }
+  to {
+    box-shadow: 0 0 18px rgba(255, 200, 50, 0.6);
+  }
+}
+
 /* === Modals (fixed overlay) === */
 #ranking-modal,
 #ranking-list-modal {

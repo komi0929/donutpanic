@@ -388,10 +388,79 @@ const Game = {
       document.getElementById('rank-display').textContent = `第 ${rank} 位！`;
       document.getElementById('rank-time-display').textContent = Ranking.formatTime(this.clearTime);
       document.getElementById('rank-name-input').value = '';
+
+      // Build animated ranking visualization
+      this._buildRankAnimation(rank);
+
       document.getElementById('ranking-modal').style.display = 'flex';
       this.rankingModalOpen = true;
       SE.rankIn();
     }
+  },
+
+  /**
+   * Build the animated ranking list showing all 10 slots with player highlighted
+   */
+  _buildRankAnimation(playerRank) {
+    const container = document.getElementById('rank-animation-list');
+    container.innerHTML = '';
+
+    // Get current rankings and insert player entry
+    const existingRankings = Ranking.getWeeklyRanking().slice(); // clone
+    const entries = [];
+
+    // Build the display list: insert player at their rank position
+    for (let i = 0; i < 10; i++) {
+      const displayRank = i + 1;
+      if (displayRank === playerRank) {
+        // This is where the player slots in
+        entries.push({
+          rank: displayRank,
+          name: '▶ あなた',
+          time: Ranking.formatTime(this.clearTime),
+          isPlayer: true,
+        });
+      } else if (displayRank < playerRank) {
+        // Entries above player — use existing ranking as-is
+        const entry = existingRankings[i];
+        entries.push({
+          rank: displayRank,
+          name: entry ? entry.name : '---',
+          time: entry ? Ranking.formatTime(entry.time) : '--:--.--',
+          isPlayer: false,
+        });
+      } else {
+        // Entries below player — shifted down by 1
+        const entry = existingRankings[i - 1];
+        entries.push({
+          rank: displayRank,
+          name: entry ? entry.name : '---',
+          time: entry ? Ranking.formatTime(entry.time) : '--:--.--',
+          isPlayer: false,
+        });
+      }
+    }
+
+    // Create DOM elements with staggered animation
+    entries.forEach((entry, idx) => {
+      const div = document.createElement('div');
+      div.className = 'rank-entry' + (entry.isPlayer ? ' is-player' : '');
+      div.style.animationDelay = (idx * 0.08) + 's';
+      div.innerHTML = `
+        <span class="rank-num">${entry.rank}</span>
+        <span class="rank-name">${entry.name}</span>
+        <span class="rank-time">${entry.time}</span>
+      `;
+      container.appendChild(div);
+    });
+
+    // Auto-scroll to player entry after animation
+    setTimeout(() => {
+      const playerEntry = container.querySelector('.is-player');
+      if (playerEntry) {
+        playerEntry.scrollIntoView({ behavior: 'smooth', block: 'center' });
+      }
+    }, playerRank * 80 + 200);
   },
 
   async _saveRanking() {
