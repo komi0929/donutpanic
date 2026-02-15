@@ -52,8 +52,10 @@ const Game = {
    * Initialize the game
    */
   init() {
+    console.log('[DonutPanic] init() called');
     this.canvas = document.getElementById('game-canvas');
     this.ctx = this.canvas.getContext('2d');
+    console.log('[DonutPanic] canvas:', this.canvas, 'ctx:', this.ctx);
 
     this._resizeCanvas();
     // Resize handling — listen to both window.resize and visualViewport for mobile
@@ -168,8 +170,18 @@ const Game = {
 
     // Read the actual size the flex layout gave the canvas
     const rect = this.canvas.getBoundingClientRect();
-    this.width = rect.width;
-    this.height = rect.height;
+    this.width = rect.width || window.innerWidth;
+    this.height = rect.height || window.innerHeight;
+    console.log('[DonutPanic] _resizeCanvas:', this.width, 'x', this.height, 'rect:', rect.width, rect.height);
+
+    // Fallback: if container or canvas has no size, set explicit dimensions
+    if (this.width <= 0 || this.height <= 0) {
+      this.width = Math.min(window.innerWidth, 500);
+      this.height = window.innerHeight;
+      this.canvas.style.width = this.width + 'px';
+      this.canvas.style.height = this.height + 'px';
+      console.warn('[DonutPanic] Zero-size canvas, using fallback:', this.width, 'x', this.height);
+    }
 
     // Device pixel ratio for crisp rendering
     const dpr = window.devicePixelRatio || 1;
@@ -179,7 +191,7 @@ const Game = {
 
     // Calculate tile size for game grid
     if (this.rows > 0 && this.cols > 0) {
-      const availableHeight = this.height - 40; // 36px HUD bar + 4px pad
+      const availableHeight = this.height - 40;
       const tileSizeW = Math.floor(this.width / this.cols);
       const tileSizeH = Math.floor(availableHeight / this.rows);
       this.tileSize = Math.min(tileSizeW, tileSizeH);
