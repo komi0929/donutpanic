@@ -4,6 +4,7 @@ const SE = {
   _ctx: null,
   _initialized: false,
   _muted: false,
+  _lastHeartbeat: 0,
 
   /**
    * Initialize AudioContext (must be triggered by user gesture on mobile)
@@ -131,5 +132,38 @@ const SE = {
   /** UI click / button press */
   click() {
     this._tone(600, 0.04, 'square', 0.06);
+  },
+
+  /** Reinforcement monster spawn warning */
+  reinforcement() {
+    this._tone(220, 0.15, 'sawtooth', 0.10);
+    this._tone(330, 0.10, 'sawtooth', 0.08, 0.12);
+    this._tone(220, 0.20, 'sawtooth', 0.12, 0.22);
+  },
+
+  /**
+   * Heartbeat SE — "ドクドク" sound based on monster proximity
+   * @param {number} rate - 0 (far/no beat) to 1 (adjacent/maximum panic)
+   * Call this from game _update loop every frame
+   */
+  heartbeat(rate) {
+    if (!this._ctx || this._muted || rate <= 0) return;
+
+    const now = performance.now();
+    // Interval: 800ms (calm) → 250ms (panic)
+    const interval = 800 - rate * 550;
+
+    if (now - this._lastHeartbeat < interval) return;
+    this._lastHeartbeat = now;
+
+    const volume = 0.06 + rate * 0.10; // Louder when closer
+
+    // First beat: "ドク" (low thump)
+    this._tone(60, 0.08, 'sine', volume);
+    this._tone(80, 0.06, 'sine', volume * 0.7, 0.02);
+
+    // Second beat: "ドク" (slightly higher, softer) — delayed
+    this._tone(65, 0.06, 'sine', volume * 0.6, 0.12);
+    this._tone(85, 0.05, 'sine', volume * 0.4, 0.14);
   },
 };

@@ -48,14 +48,19 @@ const Game = {
   // Particles for celebration
   particles: [],
 
+  // Panic effects
+  _shakeOffsetX: 0,
+  _shakeOffsetY: 0,
+  _closestMonsterDist: Infinity,
+  _reinforcementTimer: 0,
+  _reinforcementLastTime: 0,
+
   /**
    * Initialize the game
    */
   init() {
-    console.log('[DonutPanic] init() called');
     this.canvas = document.getElementById('game-canvas');
     this.ctx = this.canvas.getContext('2d');
-    console.log('[DonutPanic] canvas:', this.canvas, 'ctx:', this.ctx);
 
     this._resizeCanvas();
     // Resize handling — listen to both window.resize and visualViewport for mobile
@@ -172,7 +177,6 @@ const Game = {
     const rect = this.canvas.getBoundingClientRect();
     this.width = rect.width || window.innerWidth;
     this.height = rect.height || window.innerHeight;
-    console.log('[DonutPanic] _resizeCanvas:', this.width, 'x', this.height, 'rect:', rect.width, rect.height);
 
     // Fallback: if container or canvas has no size, set explicit dimensions
     if (this.width <= 0 || this.height <= 0) {
@@ -180,7 +184,7 @@ const Game = {
       this.height = window.innerHeight;
       this.canvas.style.width = this.width + 'px';
       this.canvas.style.height = this.height + 'px';
-      console.warn('[DonutPanic] Zero-size canvas, using fallback:', this.width, 'x', this.height);
+      console.warn('[DonutPanic] Zero-size canvas fallback:', this.width, 'x', this.height);
     }
 
     // Device pixel ratio for crisp rendering
@@ -229,7 +233,10 @@ const Game = {
           this.player = new Player(x, y);
           this.grid[y][x] = CONFIG.TILE.FLOOR;
         } else if (tile === CONFIG.TILE.MONSTER_START) {
-          this.monsters.push(new Monster(x, y, monsterIndex++));
+          this.monsters.push(new Monster(x, y, monsterIndex++, false));
+          this.grid[y][x] = CONFIG.TILE.FLOOR;
+        } else if (tile === CONFIG.TILE.DASH_MONSTER_START) {
+          this.monsters.push(new Monster(x, y, monsterIndex++, true));
           this.grid[y][x] = CONFIG.TILE.FLOOR;
         } else if (tile === CONFIG.TILE.GOAL) {
           this.goalX = x;
@@ -332,6 +339,7 @@ const Game = {
 
       SE.gameStart();
       this._loadLevel(this.currentLevel);
+      this._reinforcementLastTime = performance.now();
       this.state = 'playing';
       this.timerStart = performance.now();
       this.timerElapsed = 0;
@@ -459,6 +467,52 @@ const Game = {
       }
     }
 
+    // Clean up expired donuts — release reservations
+    for (const donut of this.donuts) {
+      if (!donut.active && donut.reservedBy !== null) {
+        donut.reservedBy = null;
+      }
+    }
+
+    // Calculate closest active monster distance for panic effects
+    this._closestMonsterDist = Infinity;
+    for (const monster of this.monsters) {
+      if (monster.state === 'sleep' || monster.state === 'eating') continue;
+      const dist = gridDistance(monster.gridX, monster.gridY, this.player.gridX, this.player.gridY);
+      if (dist < this._closestMonsterDist) {
+        this._closestMonsterDist = dist;
+      }
+    }
+
+    // Heartbeat SE based on proximity
+    if (this._closestMonsterDist <= 5) {
+      const rate = 1 - (this._closestMonsterDist - 1) / 4; // 1.0 at dist=1, 0.0 at dist=5
+      SE.heartbeat(Math.max(0, Math.min(1, rate)));
+    }
+
+    // Screen shake when monster is close (distance <= 3)
+    if (this._closestMonsterDist <= 3) {
+      const intensity = (3 - this._closestMonsterDist) / 3; // 0→1
+      this._shakeOffsetX = (Math.random() - 0.5) * intensity * 6;
+      this._shakeOffsetY = (Math.random() - 0.5) * intensity * 6;
+    } else {
+      this._shakeOffsetX = 0;
+      this._shakeOffsetY = 0;
+    }
+
+    // Reinforcement spawning
+    if (!this._reinforcementLastTime) {
+      this._reinforcementLastTime = performance.now();
+    }
+    const timeSinceLastReinforcement = performance.now() - this._reinforcementLastTime;
+    if (timeSinceLastReinforcement >= CONFIG.REINFORCEMENT_INTERVAL) {
+      this._reinforcementLastTime = performance.now();
+      const activeMonsters = this.monsters.filter(m => m.state !== 'sleep').length;
+      if (activeMonsters < CONFIG.REINFORCEMENT_MAX_MONSTERS) {
+        this._spawnReinforcement();
+      }
+    }
+
     // Check win condition: player reached goal
     if (this.player.gridX === this.goalX && this.player.gridY === this.goalY) {
       this.clearTime = this.timerElapsed;
@@ -510,6 +564,52 @@ const Game = {
   },
 
   /**
+   * Spawn a reinforcement monster at a random floor tile
+   */
+  _spawnReinforcement() {
+    // Find all floor tiles not occupied by player, monsters, donuts, or goal
+    const candidates = [];
+    for (let y = 1; y < this.rows - 1; y++) {
+      for (let x = 1; x < this.cols - 1; x++) {
+        if (this.grid[y][x] !== CONFIG.TILE.FLOOR) continue;
+        if (x === this.goalX && y === this.goalY) continue;
+        if (this.player && this.player.gridX === x && this.player.gridY === y) continue;
+        // Not too close to player (at least 4 tiles away)
+        if (this.player && gridDistance(x, y, this.player.gridX, this.player.gridY) < 4) continue;
+        let occupied = false;
+        for (const m of this.monsters) {
+          if (m.gridX === x && m.gridY === y) { occupied = true; break; }
+        }
+        if (occupied) continue;
+        candidates.push({ x, y });
+      }
+    }
+    if (candidates.length === 0) return;
+
+    const pos = candidates[Math.floor(Math.random() * candidates.length)];
+    // 30% chance of dash monster
+    const isDash = Math.random() < 0.3;
+    const monsterIndex = this.monsters.length;
+    this.monsters.push(new Monster(pos.x, pos.y, monsterIndex, isDash));
+    SE.reinforcement();
+
+    // Spawn particles at location
+    const cx = this.offsetX + pos.x * this.tileSize + this.tileSize / 2;
+    const cy = this.offsetY + pos.y * this.tileSize + this.tileSize / 2;
+    for (let i = 0; i < 15; i++) {
+      this.particles.push({
+        x: cx,
+        y: cy,
+        vx: (Math.random() - 0.5) * 5,
+        vy: (Math.random() - 0.5) * 5,
+        color: isDash ? '#FF4444' : '#9B59B6',
+        size: 2 + Math.random() * 3,
+        life: 30 + Math.random() * 20,
+      });
+    }
+  },
+
+  /**
    * Draw everything
    */
   _draw() {
@@ -524,6 +624,12 @@ const Game = {
     if (this.state === 'title') {
       this._drawTitle();
       return;
+    }
+
+    // Apply screen shake during playing state
+    if (this.state === 'playing') {
+      ctx.save();
+      ctx.translate(this._shakeOffsetX, this._shakeOffsetY);
     }
 
     // Draw grid
@@ -551,13 +657,46 @@ const Game = {
       ctx.globalAlpha = p.life / 100;
       ctx.fillStyle = p.color;
       ctx.beginPath();
-      ctx.arc(p.x, p.y, p.size, 0, Math.PI * 2);
+      ctx.arc(p.x, p.y, p.size || 3, 0, Math.PI * 2);
       ctx.fill();
     }
     ctx.globalAlpha = 1;
 
+    // === FOG OF WAR ===
+    if (this.state === 'playing' && this.player) {
+      const fogCx = this.offsetX + this.player.pixelX * this.tileSize + this.tileSize / 2;
+      const fogCy = this.offsetY + this.player.pixelY * this.tileSize + this.tileSize / 2;
+      const fogRadius = this.tileSize * 3.5;
+      const fogGrad = ctx.createRadialGradient(fogCx, fogCy, fogRadius * 0.6, fogCx, fogCy, fogRadius * 1.8);
+      fogGrad.addColorStop(0, 'rgba(0, 0, 0, 0)');
+      fogGrad.addColorStop(0.5, 'rgba(0, 0, 0, 0.3)');
+      fogGrad.addColorStop(1, 'rgba(0, 0, 0, 0.85)');
+      ctx.fillStyle = fogGrad;
+      ctx.fillRect(0, 0, w, h);
+    }
+
+    // === RED ALERT VIGNETTE ===
+    if (this.state === 'playing' && this._closestMonsterDist <= 2) {
+      const alertIntensity = (2 - this._closestMonsterDist) / 2; // 0→1
+      const pulse = Math.sin(this.frame * 0.15) * 0.3 + 0.7;
+      ctx.save();
+      ctx.globalAlpha = alertIntensity * pulse * 0.4;
+      // Draw red vignette on edges
+      const vigGrad = ctx.createRadialGradient(w / 2, h / 2, Math.min(w, h) * 0.3, w / 2, h / 2, Math.max(w, h) * 0.7);
+      vigGrad.addColorStop(0, 'rgba(255, 0, 0, 0)');
+      vigGrad.addColorStop(1, 'rgba(255, 0, 0, 1)');
+      ctx.fillStyle = vigGrad;
+      ctx.fillRect(0, 0, w, h);
+      ctx.restore();
+    }
+
     // Draw HUD (timer, stage name)
     this._drawHUD();
+
+    // Remove screen shake offset
+    if (this.state === 'playing') {
+      ctx.restore();
+    }
 
     // Draw overlay screens
     if (this.state === 'clear') {

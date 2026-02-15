@@ -3,7 +3,7 @@
 let _monsterIdCounter = 0;
 
 class Monster {
-  constructor(gridX, gridY, index) {
+  constructor(gridX, gridY, index, isDash = false) {
     this.id = _monsterIdCounter++;
     this.index = index; // For color variation
     this.gridX = gridX;
@@ -21,6 +21,10 @@ class Monster {
     this.alertTimer = 0;   // Show "!" for a brief moment
     this.effectType = null; // 'alert', 'heart', 'zzz'
     this.isWalkable = true;
+
+    // Dash monster properties
+    this.isDash = isDash;
+    this.moveCounter = 0; // Counts frames for dash timing
   }
 
   /**
@@ -28,6 +32,15 @@ class Monster {
    */
   update(dt, grid, player, donuts, monsters, rows, cols) {
     this.frame++;
+
+    // Dash monster moves every N cycles
+    if (this.isDash) {
+      this.moveCounter++;
+      if (this.moveCounter < CONFIG.DASH_MONSTER_MOVE_INTERVAL) {
+        return; // Skip this update cycle
+      }
+      this.moveCounter = 0;
+    }
 
     switch (this.state) {
       case 'patrol':
@@ -76,7 +89,8 @@ class Monster {
       this._pickRandomPatrolTarget(grid, rows, cols);
     }
 
-    this._moveAlongPath(dt, CONFIG.MONSTER_SPEED);
+    const speed = this.isDash ? CONFIG.DASH_MONSTER_SPEED : CONFIG.MONSTER_SPEED;
+    this._moveAlongPath(dt, speed);
   }
 
   /**
@@ -105,7 +119,13 @@ class Monster {
       this.pathIndex = 0;
     }
 
-    this._moveAlongPath(dt, CONFIG.MONSTER_CHASE_SPEED);
+    const speed = this.isDash ? CONFIG.DASH_MONSTER_SPEED : CONFIG.MONSTER_CHASE_SPEED;
+    this._moveAlongPath(dt, speed);
+
+    // Dash monsters move 2 tiles per step
+    if (this.isDash) {
+      this._moveAlongPath(dt, speed);
+    }
   }
 
   /**
@@ -134,7 +154,8 @@ class Monster {
       this.pathIndex = 0;
     }
 
-    this._moveAlongPath(dt, CONFIG.MONSTER_SPEED);
+    const speed = this.isDash ? CONFIG.DASH_MONSTER_SPEED : CONFIG.MONSTER_SPEED;
+    this._moveAlongPath(dt, speed);
   }
 
   /**
@@ -300,7 +321,25 @@ class Monster {
     else if (this.state === 'eating') spriteState = 'eating';
     else if (this.state === 'sleep') spriteState = 'sleep';
 
-    Sprites.drawMonster(ctx, drawX, drawY, tileSize, spriteState, this.frame, this.index);
+    // Dash monsters always use red palette (index 2)
+    const colorIndex = this.isDash ? 2 : this.index;
+    Sprites.drawMonster(ctx, drawX, drawY, tileSize, spriteState, this.frame, colorIndex);
+
+    // Draw dash indicator (speed lines)
+    if (this.isDash && this.state !== 'sleep' && this.state !== 'eating') {
+      ctx.save();
+      ctx.globalAlpha = 0.5;
+      ctx.strokeStyle = '#FF4444';
+      ctx.lineWidth = 1.5;
+      for (let i = 0; i < 3; i++) {
+        const offsetLine = (this.frame * 2 + i * 8) % 20 - 10;
+        ctx.beginPath();
+        ctx.moveTo(drawX - 3, drawY + tileSize * 0.3 + i * 5 + offsetLine);
+        ctx.lineTo(drawX - 8, drawY + tileSize * 0.3 + i * 5 + offsetLine);
+        ctx.stroke();
+      }
+      ctx.restore();
+    }
 
     // Draw effect
     if (this.effectType) {
