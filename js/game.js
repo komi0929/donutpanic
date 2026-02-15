@@ -265,6 +265,18 @@ const Game = {
     } else {
       btn.classList.remove('disabled');
     }
+
+    // Render donut icon on button canvas (same sprite as in-game)
+    const btnCanvas = document.getElementById('donut-btn-canvas');
+    if (btnCanvas) {
+      const bctx = btnCanvas.getContext('2d');
+      const dpr = window.devicePixelRatio || 1;
+      btnCanvas.width = 50 * dpr;
+      btnCanvas.height = 50 * dpr;
+      bctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+      bctx.clearRect(0, 0, 50, 50);
+      Sprites.drawDonut(bctx, 1, 1, 48, 'strawberry');
+    }
   },
 
   /**
