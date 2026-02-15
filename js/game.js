@@ -613,30 +613,22 @@ const Game = {
       m.x += m.vx;
       m.y += m.vy;
       if (m.x < 0.05 || m.x > 0.95) m.vx *= -1;
-      if (m.y < 0.05 || m.y > 0.45) m.vy *= -1;
+      if (m.y < 0.05 || m.y > 0.55) m.vy *= -1;
       if (Math.random() < 0.005) {
         m.vx = (Math.random() - 0.5) * 0.001;
         m.vy = (Math.random() - 0.5) * 0.0008;
       }
       const mx = m.x * w;
       const my = m.y * h;
-      ctx.globalAlpha = 0.6;
+      ctx.globalAlpha = 0.5;
       Sprites.drawMonster(ctx, mx - m.size / 2, my - m.size / 2, m.size, 'normal', this.frame + m.index * 30, m.index);
       ctx.globalAlpha = 1;
     }
 
-    // Dark overlay for text readability
-    const overlay = ctx.createLinearGradient(0, h * 0.32, 0, h * 0.58);
-    overlay.addColorStop(0, 'rgba(26, 10, 46, 0)');
-    overlay.addColorStop(0.3, 'rgba(26, 10, 46, 0.8)');
-    overlay.addColorStop(0.7, 'rgba(26, 10, 46, 0.85)');
-    overlay.addColorStop(1, 'rgba(26, 10, 46, 0.5)');
-    ctx.fillStyle = overlay;
-    ctx.fillRect(0, h * 0.32, w, h * 0.28);
 
     // === Rich Title ===
     const bounce = Math.sin(this.frame * 0.05) * 5;
-    const titleY = h * 0.40 + bounce;
+    const titleY = h * 0.35 + bounce;
     ctx.textAlign = 'center';
     ctx.textBaseline = 'middle';
     const fontSize = Math.min(44, w * 0.11);
@@ -670,14 +662,10 @@ const Game = {
     ctx.strokeText('ドーナツパニック', cx, titleY);
     ctx.restore();
 
-    // Subtitle
-    ctx.fillStyle = 'rgba(255, 220, 180, 0.7)';
-    ctx.font = '13px "M PLUS Rounded 1c", sans-serif';
-    ctx.fillText('🍩 スイーツ脱出パズル 🍩', cx, titleY + fontSize * 0.7);
 
     // === Simplified Instructions (3 lines) ===
     ctx.font = '14px "M PLUS Rounded 1c", sans-serif';
-    const instrY = h * 0.54;
+    const instrY = h * 0.48;
     const instructions = [
       '🏠 ケーキの家がゴール！',
       '🍩 ドーナツでモンスターを誘惑',
@@ -688,17 +676,14 @@ const Game = {
       ctx.fillText(text, cx, instrY + i * 26);
     });
 
-    // Start prompt
-    const startY = h * 0.78;
+    // Start prompt — prominent, centered
+    const startY = h * 0.70;
     const alpha = Math.sin(this.frame * 0.08) * 0.4 + 0.6;
     ctx.globalAlpha = alpha;
     ctx.fillStyle = '#FFFFFF';
-    ctx.font = 'bold 20px "M PLUS Rounded 1c", sans-serif';
+    ctx.font = 'bold 22px "M PLUS Rounded 1c", sans-serif';
     ctx.fillText('タップしてスタート', cx, startY);
     ctx.globalAlpha = 1;
-
-    // Draw chef at bottom
-    Sprites.drawChef(ctx, cx - 35, h * 0.88, 70, this.frame);
   },
 
   /**
