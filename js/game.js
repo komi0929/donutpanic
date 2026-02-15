@@ -139,6 +139,14 @@ const Game = {
     // Initialize sound effects
     SE.init();
 
+    // Setup resize handler and initial size
+    const resizeHandler = () => this._resizeCanvas();
+    window.addEventListener('resize', resizeHandler);
+    if (window.visualViewport) {
+      window.visualViewport.addEventListener('resize', resizeHandler);
+    }
+    this._resizeCanvas();
+
     // Start
     this.state = 'title';
     this.lastTime = performance.now();
