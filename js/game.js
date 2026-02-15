@@ -121,11 +121,7 @@ const Game = {
     document.getElementById('rank-save-btn').addEventListener('click', () => this._saveRanking());
     document.getElementById('rank-skip-btn').addEventListener('click', () => this._skipRanking());
 
-    // Ranking list button (title screen)
-    document.getElementById('ranking-list-btn').addEventListener('click', (e) => {
-      e.stopPropagation();
-      this._showRankingList();
-    });
+    // Ranking list close button
     document.getElementById('ranking-list-close-btn').addEventListener('click', () => this._hideRankingList());
 
     // Prevent context menu
@@ -140,7 +136,6 @@ const Game = {
 
     // Start
     this.state = 'title';
-    document.getElementById('title-buttons').style.display = '';
     this.lastTime = performance.now();
     this._loop(this.lastTime);
   },
@@ -299,16 +294,25 @@ const Game = {
     if (this.rankingListOpen) return; // Block taps while ranking list is open
 
     if (this.state === 'title') {
-      SE.resume(); // Resume AudioContext on first user gesture
+      SE.resume(); // Resume AudioContext
+
+      // Check for ranking tap (y around 0.54h)
+      const cx = this.width / 2;
+      const rankY = this.height * 0.54;
+      if (Math.abs(screenY - rankY) < 35 && Math.abs(screenX - cx) < 100) {
+        this._showRankingList();
+        SE.click();
+        return;
+      }
+
       SE.gameStart();
       this._loadLevel(this.currentLevel);
       this.state = 'playing';
       this.timerStart = performance.now();
       this.timerElapsed = 0;
-      // Show game controls, hide title buttons
+      // Show game controls
       document.getElementById('controls-panel').style.display = '';
-      document.getElementById('title-buttons').style.display = 'none';
-      // Recalculate canvas size with controls visible
+      // Recalculate canvas size
       setTimeout(() => this._resizeCanvas(), 0);
       return;
     }
@@ -316,10 +320,9 @@ const Game = {
     if (this.state === 'clear' || this.state === 'gameover') {
       this.state = 'title';
       this._titleMonsters = null;
-      // Hide controls, show title buttons
+      // Hide controls
       document.getElementById('controls-panel').style.display = 'none';
-      document.getElementById('title-buttons').style.display = '';
-      // Recalculate canvas size with title buttons
+      // Recalculate canvas size
       setTimeout(() => this._resizeCanvas(), 0);
       // Refresh rankings for title screen
       Ranking.preloadRankings();
@@ -667,6 +670,11 @@ const Game = {
     ctx.font = 'bold 18px "M PLUS Rounded 1c", sans-serif';
     ctx.fillStyle = '#CCBBDD';
     ctx.fillText('🍩 ドーナツでモンスターを誘惑！', cx, h * 0.48);
+
+    // Ranking Link (Text-only, borderless, directly below instruction)
+    ctx.font = 'bold 14px "M PLUS Rounded 1c", sans-serif';
+    ctx.fillStyle = 'rgba(255, 220, 180, 0.6)';
+    ctx.fillText('🏆 今週のランキング', cx, h * 0.54);
 
     // Start prompt
     const startY = h * 0.72;
