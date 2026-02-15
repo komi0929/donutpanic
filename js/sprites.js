@@ -14,218 +14,165 @@ const Sprites = {
     ctx.save();
     ctx.translate(cx, cy + bounce);
 
-    // === Spatula (behind body, right side) ===
-    // Handle
-    ctx.strokeStyle = '#6B4226';
-    ctx.lineWidth = s * 0.04;
-    ctx.lineCap = 'round';
-    ctx.beginPath();
-    ctx.moveTo(s * 0.22, -s * 0.02);
-    ctx.lineTo(s * 0.36, -s * 0.28);
-    ctx.stroke();
-    // Spatula head
-    ctx.fillStyle = '#555555';
-    ctx.beginPath();
-    ctx.moveTo(s * 0.30, -s * 0.28);
-    ctx.lineTo(s * 0.42, -s * 0.32);
-    ctx.lineTo(s * 0.44, -s * 0.40);
-    ctx.lineTo(s * 0.32, -s * 0.38);
-    ctx.closePath();
-    ctx.fill();
-    ctx.fillStyle = '#777777';
-    ctx.beginPath();
-    ctx.moveTo(s * 0.31, -s * 0.29);
-    ctx.lineTo(s * 0.41, -s * 0.33);
-    ctx.lineTo(s * 0.42, -s * 0.38);
-    ctx.lineTo(s * 0.32, -s * 0.36);
-    ctx.closePath();
-    ctx.fill();
-
     // === Feet (orange, small) ===
     ctx.fillStyle = '#E8960C';
     ctx.beginPath();
-    ctx.ellipse(-s * 0.1, s * 0.32, s * 0.07, s * 0.03, -0.2, 0, Math.PI * 2);
+    ctx.ellipse(-s * 0.08, s * 0.36, s * 0.06, s * 0.025, -0.2, 0, Math.PI * 2);
     ctx.fill();
     ctx.beginPath();
-    ctx.ellipse(s * 0.1, s * 0.32, s * 0.07, s * 0.03, 0.2, 0, Math.PI * 2);
+    ctx.ellipse(s * 0.08, s * 0.36, s * 0.06, s * 0.025, 0.2, 0, Math.PI * 2);
     ctx.fill();
-    // Toes
-    ctx.fillStyle = '#D08008';
-    for (let side = -1; side <= 1; side += 2) {
-      for (let t = -1; t <= 1; t++) {
-        ctx.beginPath();
-        ctx.ellipse(side * s * 0.1 + t * s * 0.025, s * 0.345, s * 0.012, s * 0.008, 0, 0, Math.PI * 2);
-        ctx.fill();
-      }
-    }
 
-    // === Body (round yellow chick) ===
-    const bodyGrad = ctx.createRadialGradient(-s * 0.05, -s * 0.08, s * 0.02, 0, s * 0.02, s * 0.32);
+    // === Body (small, round — kawaii proportions) ===
+    const bodyGrad = ctx.createRadialGradient(-s * 0.03, s * 0.12, s * 0.02, 0, s * 0.15, s * 0.22);
     bodyGrad.addColorStop(0, '#FFF8D0');
-    bodyGrad.addColorStop(0.3, '#FFE88A');
-    bodyGrad.addColorStop(0.7, '#FFDD55');
+    bodyGrad.addColorStop(0.4, '#FFE88A');
+    bodyGrad.addColorStop(0.8, '#FFDD55');
     bodyGrad.addColorStop(1, '#E8C030');
     ctx.fillStyle = bodyGrad;
     ctx.beginPath();
-    ctx.ellipse(0, s * 0.04, s * 0.28, s * 0.30, 0, 0, Math.PI * 2);
+    ctx.ellipse(0, s * 0.18, s * 0.20, s * 0.20, 0, 0, Math.PI * 2);
     ctx.fill();
-    // Body outline
-    ctx.strokeStyle = '#B09020';
-    ctx.lineWidth = s * 0.025;
-    ctx.beginPath();
-    ctx.ellipse(0, s * 0.04, s * 0.28, s * 0.30, 0, 0, Math.PI * 2);
+    ctx.strokeStyle = '#C0A020';
+    ctx.lineWidth = s * 0.02;
     ctx.stroke();
-
-    // Belly highlight
-    const bellyGrad = ctx.createRadialGradient(0, s * 0.08, 0, 0, s * 0.08, s * 0.18);
-    bellyGrad.addColorStop(0, 'rgba(255, 255, 240, 0.4)');
-    bellyGrad.addColorStop(1, 'rgba(255, 255, 240, 0)');
-    ctx.fillStyle = bellyGrad;
-    ctx.beginPath();
-    ctx.ellipse(0, s * 0.08, s * 0.16, s * 0.18, 0, 0, Math.PI * 2);
-    ctx.fill();
 
     // === Red Scarf / Neckerchief ===
-    ctx.fillStyle = '#CC2222';
+    ctx.fillStyle = '#DD2222';
     ctx.beginPath();
-    ctx.moveTo(-s * 0.18, -s * 0.14);
-    ctx.quadraticCurveTo(-s * 0.12, -s * 0.08, -s * 0.06, -s * 0.12);
-    ctx.lineTo(0, -s * 0.10);
-    ctx.lineTo(s * 0.06, -s * 0.12);
-    ctx.quadraticCurveTo(s * 0.12, -s * 0.08, s * 0.18, -s * 0.14);
-    ctx.quadraticCurveTo(s * 0.14, -s * 0.16, s * 0.10, -s * 0.18);
-    ctx.lineTo(0, -s * 0.17);
-    ctx.lineTo(-s * 0.10, -s * 0.18);
-    ctx.quadraticCurveTo(-s * 0.14, -s * 0.16, -s * 0.18, -s * 0.14);
+    ctx.moveTo(-s * 0.14, s * 0.02);
+    ctx.quadraticCurveTo(-s * 0.08, s * 0.08, -s * 0.03, s * 0.04);
+    ctx.lineTo(0, s * 0.06);
+    ctx.lineTo(s * 0.03, s * 0.04);
+    ctx.quadraticCurveTo(s * 0.08, s * 0.08, s * 0.14, s * 0.02);
+    ctx.quadraticCurveTo(s * 0.10, -s * 0.01, s * 0.06, -s * 0.02);
+    ctx.lineTo(0, -s * 0.01);
+    ctx.lineTo(-s * 0.06, -s * 0.02);
+    ctx.quadraticCurveTo(-s * 0.10, -s * 0.01, -s * 0.14, s * 0.02);
     ctx.closePath();
     ctx.fill();
-    ctx.strokeStyle = '#991111';
-    ctx.lineWidth = s * 0.012;
+    ctx.strokeStyle = '#AA1111';
+    ctx.lineWidth = s * 0.01;
     ctx.stroke();
-    // Scarf tails (hanging down front)
-    ctx.fillStyle = '#BB1111';
+    // Scarf tail
+    ctx.fillStyle = '#CC1111';
     ctx.beginPath();
-    ctx.moveTo(-s * 0.02, -s * 0.10);
-    ctx.lineTo(-s * 0.06, s * 0.06);
-    ctx.lineTo(-s * 0.01, s * 0.04);
-    ctx.closePath();
-    ctx.fill();
-    ctx.beginPath();
-    ctx.moveTo(s * 0.02, -s * 0.10);
-    ctx.lineTo(s * 0.06, s * 0.08);
-    ctx.lineTo(s * 0.01, s * 0.06);
+    ctx.moveTo(s * 0.01, s * 0.05);
+    ctx.lineTo(s * 0.04, s * 0.18);
+    ctx.lineTo(-s * 0.02, s * 0.16);
     ctx.closePath();
     ctx.fill();
 
-    // === Wings (small, at sides) ===
-    // Left wing
+    // === Wings (tiny, at sides) ===
     ctx.fillStyle = '#FFDD55';
-    ctx.strokeStyle = '#B09020';
-    ctx.lineWidth = s * 0.02;
+    ctx.strokeStyle = '#C0A020';
+    ctx.lineWidth = s * 0.015;
     ctx.beginPath();
-    ctx.ellipse(-s * 0.28, s * 0.02, s * 0.08, s * 0.13, 0.3, 0, Math.PI * 2);
+    ctx.ellipse(-s * 0.20, s * 0.14, s * 0.05, s * 0.08, 0.3, 0, Math.PI * 2);
     ctx.fill();
     ctx.stroke();
-    // Right wing (raised, holding spatula)
     ctx.beginPath();
-    ctx.ellipse(s * 0.26, -s * 0.02, s * 0.08, s * 0.12, -0.5, 0, Math.PI * 2);
+    ctx.ellipse(s * 0.20, s * 0.14, s * 0.05, s * 0.08, -0.3, 0, Math.PI * 2);
     ctx.fill();
     ctx.stroke();
 
-    // === Head (large, round yellow) ===
-    const headGrad = ctx.createRadialGradient(-s * 0.03, -s * 0.26, s * 0.02, 0, -s * 0.22, s * 0.2);
+    // === HEAD (BIG — kawaii style, ~60% of sprite) ===
+    const headGrad = ctx.createRadialGradient(-s * 0.03, -s * 0.18, s * 0.02, 0, -s * 0.12, s * 0.28);
     headGrad.addColorStop(0, '#FFF8D0');
-    headGrad.addColorStop(0.4, '#FFE88A');
-    headGrad.addColorStop(0.8, '#FFDD55');
+    headGrad.addColorStop(0.3, '#FFE88A');
+    headGrad.addColorStop(0.7, '#FFDD55');
     headGrad.addColorStop(1, '#E8C030');
     ctx.fillStyle = headGrad;
     ctx.beginPath();
-    ctx.arc(0, -s * 0.22, s * 0.20, 0, Math.PI * 2);
+    ctx.arc(0, -s * 0.12, s * 0.28, 0, Math.PI * 2);
     ctx.fill();
-    ctx.strokeStyle = '#B09020';
-    ctx.lineWidth = s * 0.025;
+    ctx.strokeStyle = '#C0A020';
+    ctx.lineWidth = s * 0.02;
     ctx.stroke();
 
     // === Chef Hat ===
-    // Hat band/base
+    // Hat band
     ctx.fillStyle = '#FFFFFF';
-    ctx.strokeStyle = '#8B7355';
-    ctx.lineWidth = s * 0.02;
+    ctx.strokeStyle = '#BBAA88';
+    ctx.lineWidth = s * 0.015;
     ctx.beginPath();
-    ctx.ellipse(0, -s * 0.34, s * 0.18, s * 0.04, 0, 0, Math.PI * 2);
+    ctx.ellipse(0, -s * 0.34, s * 0.22, s * 0.045, 0, 0, Math.PI * 2);
     ctx.fill();
     ctx.stroke();
-    // Hat puff (tall part)
-    const hatGrad = ctx.createLinearGradient(0, -s * 0.55, 0, -s * 0.30);
+    // Hat puff
+    const hatGrad = ctx.createLinearGradient(0, -s * 0.58, 0, -s * 0.32);
     hatGrad.addColorStop(0, '#FFFFFF');
-    hatGrad.addColorStop(0.7, '#F5F5F0');
-    hatGrad.addColorStop(1, '#EEEEE8');
+    hatGrad.addColorStop(0.7, '#F8F8F4');
+    hatGrad.addColorStop(1, '#F0F0E8');
     ctx.fillStyle = hatGrad;
     ctx.beginPath();
-    ctx.moveTo(-s * 0.16, -s * 0.34);
-    ctx.quadraticCurveTo(-s * 0.20, -s * 0.42, -s * 0.14, -s * 0.50);
-    ctx.quadraticCurveTo(-s * 0.06, -s * 0.56, 0, -s * 0.54);
-    ctx.quadraticCurveTo(s * 0.06, -s * 0.56, s * 0.14, -s * 0.50);
-    ctx.quadraticCurveTo(s * 0.20, -s * 0.42, s * 0.16, -s * 0.34);
+    ctx.moveTo(-s * 0.20, -s * 0.34);
+    ctx.quadraticCurveTo(-s * 0.25, -s * 0.44, -s * 0.18, -s * 0.52);
+    ctx.quadraticCurveTo(-s * 0.08, -s * 0.58, 0, -s * 0.56);
+    ctx.quadraticCurveTo(s * 0.08, -s * 0.58, s * 0.18, -s * 0.52);
+    ctx.quadraticCurveTo(s * 0.25, -s * 0.44, s * 0.20, -s * 0.34);
     ctx.closePath();
     ctx.fill();
-    ctx.strokeStyle = '#8B7355';
-    ctx.lineWidth = s * 0.02;
+    ctx.strokeStyle = '#BBAA88';
+    ctx.lineWidth = s * 0.015;
     ctx.stroke();
 
-    // === Eyes (small black dots, kawaii style) ===
+    // === Eyes (BIG, simple black dots — kawaii!) ===
+    // Left eye
     ctx.fillStyle = '#1A1A1A';
     ctx.beginPath();
-    ctx.arc(-s * 0.08, -s * 0.22, s * 0.028, 0, Math.PI * 2);
+    ctx.arc(-s * 0.10, -s * 0.14, s * 0.045, 0, Math.PI * 2);
     ctx.fill();
+    // Right eye
     ctx.beginPath();
-    ctx.arc(s * 0.08, -s * 0.22, s * 0.028, 0, Math.PI * 2);
+    ctx.arc(s * 0.10, -s * 0.14, s * 0.045, 0, Math.PI * 2);
     ctx.fill();
-    // Eye shine
+    // Eye shine (large white dot — makes them look alive)
     ctx.fillStyle = '#FFFFFF';
     ctx.beginPath();
-    ctx.arc(-s * 0.07, -s * 0.23, s * 0.012, 0, Math.PI * 2);
+    ctx.arc(-s * 0.085, -s * 0.155, s * 0.02, 0, Math.PI * 2);
     ctx.fill();
     ctx.beginPath();
-    ctx.arc(s * 0.09, -s * 0.23, s * 0.012, 0, Math.PI * 2);
+    ctx.arc(s * 0.115, -s * 0.155, s * 0.02, 0, Math.PI * 2);
     ctx.fill();
 
-    // === Beak (orange, small triangle) ===
+    // === Beak (small, cute triangle) ===
     ctx.fillStyle = '#F0960C';
     ctx.beginPath();
-    ctx.moveTo(-s * 0.03, -s * 0.16);
-    ctx.lineTo(0, -s * 0.11);
-    ctx.lineTo(s * 0.03, -s * 0.16);
+    ctx.moveTo(-s * 0.025, -s * 0.07);
+    ctx.lineTo(0, -s * 0.03);
+    ctx.lineTo(s * 0.025, -s * 0.07);
     ctx.closePath();
     ctx.fill();
     ctx.strokeStyle = '#C07808';
-    ctx.lineWidth = s * 0.01;
+    ctx.lineWidth = s * 0.008;
     ctx.stroke();
 
-    // === Mouth (open smile below beak) ===
-    ctx.strokeStyle = '#A06008';
-    ctx.lineWidth = s * 0.015;
-    ctx.lineCap = 'round';
-    ctx.beginPath();
-    ctx.arc(0, -s * 0.12, s * 0.025, 0.2, Math.PI - 0.2);
-    ctx.stroke();
-
-    // === Cheeks (blush) ===
-    const blushGrad1 = ctx.createRadialGradient(-s * 0.15, -s * 0.17, 0, -s * 0.15, -s * 0.17, s * 0.04);
-    blushGrad1.addColorStop(0, 'rgba(255, 140, 140, 0.5)');
+    // === Cheeks (blush — kawaii pink circles) ===
+    const blushGrad1 = ctx.createRadialGradient(-s * 0.18, -s * 0.08, 0, -s * 0.18, -s * 0.08, s * 0.05);
+    blushGrad1.addColorStop(0, 'rgba(255, 140, 140, 0.55)');
     blushGrad1.addColorStop(1, 'rgba(255, 140, 140, 0)');
     ctx.fillStyle = blushGrad1;
     ctx.beginPath();
-    ctx.arc(-s * 0.15, -s * 0.17, s * 0.04, 0, Math.PI * 2);
+    ctx.arc(-s * 0.18, -s * 0.08, s * 0.05, 0, Math.PI * 2);
     ctx.fill();
-
-    const blushGrad2 = ctx.createRadialGradient(s * 0.15, -s * 0.17, 0, s * 0.15, -s * 0.17, s * 0.04);
-    blushGrad2.addColorStop(0, 'rgba(255, 140, 140, 0.5)');
+    const blushGrad2 = ctx.createRadialGradient(s * 0.18, -s * 0.08, 0, s * 0.18, -s * 0.08, s * 0.05);
+    blushGrad2.addColorStop(0, 'rgba(255, 140, 140, 0.55)');
     blushGrad2.addColorStop(1, 'rgba(255, 140, 140, 0)');
     ctx.fillStyle = blushGrad2;
     ctx.beginPath();
-    ctx.arc(s * 0.15, -s * 0.17, s * 0.04, 0, Math.PI * 2);
+    ctx.arc(s * 0.18, -s * 0.08, s * 0.05, 0, Math.PI * 2);
     ctx.fill();
+
+    // === Sparkle (decorative star — like reference image) ===
+    const sparklePhase = (frame * 0.06) % (Math.PI * 2);
+    const sparkleAlpha = Math.sin(sparklePhase) * 0.5 + 0.5;
+    ctx.globalAlpha = sparkleAlpha;
+    ctx.fillStyle = '#FFD700';
+    this._drawStar(ctx, -s * 0.34, -s * 0.28, s * 0.04, 4);
+    ctx.fillStyle = '#FFFFFF';
+    this._drawStar(ctx, s * 0.32, -s * 0.06, s * 0.025, 4);
+    ctx.globalAlpha = 1;
 
     ctx.restore();
   },
