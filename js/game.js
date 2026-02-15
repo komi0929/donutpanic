@@ -135,6 +135,9 @@ const Game = {
     // Initialize ranking system (Supabase or localStorage)
     Ranking.init();
 
+    // Initialize sound effects
+    SE.init();
+
     // Start
     this.state = 'title';
     document.getElementById('title-buttons').style.display = '';
@@ -258,6 +261,7 @@ const Game = {
     this.donuts.push(new Donut(gridX, gridY, type));
     this.inventory[type]--;
     this._updateUI();
+    SE.donutPlace();
 
     // Brief highlight animation on button
     const btn = document.getElementById('btn-' + type);
@@ -295,6 +299,8 @@ const Game = {
     if (this.rankingListOpen) return; // Block taps while ranking list is open
 
     if (this.state === 'title') {
+      SE.resume(); // Resume AudioContext on first user gesture
+      SE.gameStart();
       this._loadLevel(this.currentLevel);
       this.state = 'playing';
       this.timerStart = performance.now();
@@ -336,6 +342,7 @@ const Game = {
       document.getElementById('rank-name-input').value = '';
       document.getElementById('ranking-modal').style.display = 'flex';
       this.rankingModalOpen = true;
+      SE.rankIn();
     }
   },
 
@@ -383,6 +390,7 @@ const Game = {
 
     // Move player one tile
     this.player.setTarget(nx, ny, this.grid, this.rows, this.cols);
+    SE.move();
   },
 
   /**
@@ -427,6 +435,7 @@ const Game = {
     if (this.player.gridX === this.goalX && this.player.gridY === this.goalY) {
       this.clearTime = this.timerElapsed;
       this.state = 'clear';
+      SE.clear();
       this._spawnCelebration();
       this._onClear();
     }
@@ -438,6 +447,7 @@ const Game = {
       if (monster.gridX === this.player.gridX && monster.gridY === this.player.gridY) {
         this.state = 'gameover';
         this.player.alive = false;
+        SE.gameOver();
       }
     }
 
