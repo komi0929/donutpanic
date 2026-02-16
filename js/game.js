@@ -406,7 +406,7 @@ const Game = {
     container.innerHTML = '';
 
     // Get current rankings and insert player entry
-    const existingRankings = Ranking.getWeeklyRanking().slice(); // clone
+    const existingRankings = Ranking.getDailyRanking().slice(); // clone
     const entries = [];
 
     // Build the display list: insert player at their rank position
@@ -919,7 +919,7 @@ const Game = {
     // Ranking Link (Text-only, borderless, directly below instruction)
     ctx.font = 'bold 14px "M PLUS Rounded 1c", sans-serif';
     ctx.fillStyle = 'rgba(255, 220, 180, 0.6)';
-    ctx.fillText('🏆 今週のランキング', cx, h * 0.54);
+    ctx.fillText('🏆 本日のランキング', cx, h * 0.54);
 
     // Start prompt
     const startY = h * 0.72;
@@ -932,11 +932,11 @@ const Game = {
   },
 
   /**
-   * Show the weekly ranking list modal
+   * Show the daily ranking list modal
    */
   _showRankingList() {
     this.rankingListOpen = true;
-    const rankings = Ranking.getWeeklyRanking();
+    const rankings = Ranking.getDailyRanking();
     const body = document.getElementById('ranking-list-body');
     if (rankings.length === 0) {
       body.innerHTML = '<div style="color:#CCBBDD; padding:20px 0; font-size:14px;">まだ記録がありません</div>';

@@ -360,3 +360,28 @@ body {
   color: #CCBBDD;
   border: 1px solid rgba(255, 255, 255, 0.2);
 }
+
+/* === Footer === */
+#site-footer {
+  position: fixed;
+  bottom: 4px;
+  left: 0;
+  right: 0;
+  text-align: center;
+  z-index: 10;
+  pointer-events: none;
+}
+
+#site-footer a {
+  font-size: 10px;
+  font-weight: 700;
+  color: rgba(255, 255, 255, 0.3);
+  text-decoration: none;
+  letter-spacing: 0.5px;
+  pointer-events: auto;
+  transition: color 0.2s ease;
+}
+
+#site-footer a:hover {
+  color: rgba(255, 255, 255, 0.6);
+}

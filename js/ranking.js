@@ -1,4 +1,4 @@
-// === Weekly Ranking System (Supabase + localStorage fallback) ===
+// === Daily Ranking System (Supabase + localStorage fallback) ===
 
 const Ranking = {
   MAX_ENTRIES: 10,
@@ -20,38 +20,23 @@ const Ranking = {
   },
 
   /**
-   * Get the current week key based on Sunday 9:00 AM JST reset.
-   * Week runs from Sunday 09:00 JST to the following Sunday 09:00 JST.
+   * Get the current day key in JST (resets at midnight 00:00 JST).
+   * Returns YYYY-MM-DD in JST timezone.
    */
-  _weekKey() {
+  _dayKey() {
     const now = new Date();
     // Convert to JST (UTC+9)
     const jstMs = now.getTime() + (now.getTimezoneOffset() * 60000) + (9 * 3600000);
     const jst = new Date(jstMs);
 
-    // Calculate day-of-week (0=Sun) and hours in JST
-    let day = jst.getDay(); // 0=Sun, 1=Mon, ...
-    const hour = jst.getHours();
-
-    // Before Sunday 9AM counts as previous week
-    if (day === 0 && hour < 9) {
-      // Still in previous week period — go back 1 day
-      jst.setDate(jst.getDate() - 1);
-      day = jst.getDay();
-    }
-
-    // Find the most recent Sunday 9AM (the start of the current period)
-    const startDate = new Date(jst);
-    startDate.setDate(startDate.getDate() - day);
-    // Format as YYYY-MM-DD
-    const y = startDate.getFullYear();
-    const m = String(startDate.getMonth() + 1).padStart(2, '0');
-    const d = String(startDate.getDate()).padStart(2, '0');
+    const y = jst.getFullYear();
+    const m = String(jst.getMonth() + 1).padStart(2, '0');
+    const d = String(jst.getDate()).padStart(2, '0');
     return `${y}-${m}-${d}`;
   },
 
   _localStorageKey() {
-    return `donutpanic_ranking_${this._weekKey()}`;
+    return `donutpanic_ranking_${this._dayKey()}`;
   },
 
   // ==================
@@ -89,11 +74,11 @@ const Ranking = {
       return;
     }
     try {
-      const weekKey = this._weekKey();
+      const dayKey = this._dayKey();
       const { data, error } = await supabaseClient
         .from('rankings')
         .select('name, time_seconds, level, created_at')
-        .eq('week_key', weekKey)
+        .eq('week_key', dayKey)
         .order('time_seconds', { ascending: true })
         .limit(this.MAX_ENTRIES);
 
@@ -114,9 +99,9 @@ const Ranking = {
   },
 
   /**
-   * Get cached weekly rankings (synchronous — uses preloaded data)
+   * Get cached daily rankings (synchronous — uses preloaded data)
    */
-  getWeeklyRanking() {
+  getDailyRanking() {
     return this._cachedRankings;
   },
 
@@ -148,7 +133,7 @@ const Ranking = {
             name: entryName,
             time_seconds: timeSeconds,
             level: level,
-            week_key: this._weekKey(),
+            week_key: this._dayKey(),
           });
 
         if (error) throw error;
