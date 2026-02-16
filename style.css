@@ -364,24 +364,30 @@ body {
 /* === Footer === */
 #site-footer {
   position: fixed;
-  bottom: 4px;
+  bottom: 24px;
   left: 0;
   right: 0;
   text-align: center;
   z-index: 10;
   pointer-events: none;
+  transition: opacity 0.3s ease;
+}
+
+#site-footer.hidden {
+  opacity: 0;
+  pointer-events: none;
 }
 
 #site-footer a {
-  font-size: 10px;
+  font-size: 14px;
   font-weight: 700;
-  color: rgba(255, 255, 255, 0.3);
+  color: rgba(255, 255, 255, 0.45);
   text-decoration: none;
-  letter-spacing: 0.5px;
+  letter-spacing: 1px;
   pointer-events: auto;
   transition: color 0.2s ease;
 }
 
 #site-footer a:hover {
-  color: rgba(255, 255, 255, 0.6);
+  color: rgba(255, 255, 255, 0.7);
 }

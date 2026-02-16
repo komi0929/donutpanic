@@ -357,6 +357,7 @@ const Game = {
       this.timerElapsed = 0;
       // Show game controls
       document.getElementById('controls-panel').style.display = '';
+      document.getElementById('site-footer').classList.add('hidden');
       // Recalculate canvas size
       setTimeout(() => this._resizeCanvas(), 0);
       return;
@@ -367,6 +368,7 @@ const Game = {
       this._titleMonsters = null;
       // Hide controls
       document.getElementById('controls-panel').style.display = 'none';
+      document.getElementById('site-footer').classList.remove('hidden');
       // Recalculate canvas size
       setTimeout(() => this._resizeCanvas(), 0);
       // Refresh rankings for title screen
